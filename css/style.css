@@ -1042,17 +1042,18 @@ h1, h2, h3, h4, h5, h6 {
 
 .chapter-card {
   position: absolute;
-  max-width: 480px;
-  padding: 2.25rem;
-  background: rgba(255, 255, 255, 0.94);
-  backdrop-filter: blur(24px);
+  max-width: 410px;
+  padding: 1.5rem 1.75rem;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(20px);
   border: 1px solid var(--hairline-strong);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow-card);
+  border-radius: var(--radius-md);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
   opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateY(20px);
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   pointer-events: none;
+  z-index: 10;
 }
 
 .chapter-card.active {
@@ -1061,35 +1062,103 @@ h1, h2, h3, h4, h5, h6 {
   pointer-events: auto;
 }
 
-/* Chapter 1: Left */
+.hero-story-overlay.minimized .chapter-card {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateY(20px) !important;
+}
+
+.chapter-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+}
+
+.card-minimize-btn {
+  background: var(--bg-subtle);
+  border: 1px solid var(--hairline);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.22rem 0.55rem;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.card-minimize-btn:hover {
+  background: var(--text-primary);
+  color: #ffffff;
+}
+
+.restore-chapter-pill {
+  position: absolute;
+  top: 76px;
+  left: 32px;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--accent-cobalt);
+  color: var(--accent-cobalt);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0.45rem 0.9rem;
+  border-radius: var(--radius-full);
+  display: none;
+  align-items: center;
+  gap: 0.45rem;
+  cursor: pointer;
+  z-index: 25;
+  box-shadow: 0 4px 14px rgba(0, 71, 255, 0.18);
+  pointer-events: auto;
+}
+
+.hero-story-overlay.minimized .restore-chapter-pill {
+  display: flex;
+}
+
+/* Chapter 1: Left (Framed opposite the 3D tank on the right!) */
 #chapter-1 {
-  left: 5vw;
-  top: 18vh;
-  max-width: 520px;
+  left: 4vw;
+  top: 17vh;
+  max-width: 410px;
 }
 
-/* Chapter 2: Left */
+/* Chapter 2: Right (Dished head is on the left, card is on the right) */
 #chapter-2 {
-  left: 5vw;
-  top: 22vh;
+  right: 4vw;
+  left: auto;
+  top: 19vh;
+  max-width: 390px;
 }
 
-/* Chapter 3: Right */
+/* Chapter 3: Right (Weld is on left-center, card is on the right) */
 #chapter-3 {
-  right: 5vw;
-  top: 22vh;
+  right: 4vw;
+  left: auto;
+  top: 19vh;
+  max-width: 390px;
 }
 
-/* Chapter 4: Right */
+/* Chapter 4: Left (Manway is center-top, card is on left) */
 #chapter-4 {
-  right: 5vw;
-  top: 18vh;
+  left: 4vw;
+  right: auto;
+  top: 17vh;
+  max-width: 390px;
 }
 
-/* Chapter 5: Left */
+/* Chapter 5: Left (Saddle is on right, card is on left) */
 #chapter-5 {
-  left: 5vw;
-  top: 22vh;
+  left: 4vw;
+  right: auto;
+  top: 19vh;
+  max-width: 390px;
 }
 
 .chapter-tag {
@@ -1099,16 +1168,15 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: 0.1em;
   color: var(--accent-cobalt);
   text-transform: uppercase;
-  margin-bottom: 0.6rem;
   display: flex;
   align-items: center;
   gap: 0.4rem;
 }
 
 .chapter-title {
-  font-size: 2.1rem;
-  line-height: 1.15;
-  margin-bottom: 0.85rem;
+  font-size: 1.65rem;
+  line-height: 1.18;
+  margin-bottom: 0.65rem;
   color: var(--text-primary);
   font-weight: 800;
 }

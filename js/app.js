@@ -535,3 +535,16 @@ function initDossierModal() {
     }
   });
 }
+
+/* ==========================================================================
+   Full 3D / Chapter Card View Toggle
+   ========================================================================== */
+window.toggleChapterCards = function () {
+  const overlay = document.querySelector('.hero-story-overlay');
+  if (overlay) {
+    overlay.classList.toggle('minimized');
+    if (window.soundFX && window.soundFX.playClick) {
+      window.soundFX.playClick();
+    }
+  }
+};

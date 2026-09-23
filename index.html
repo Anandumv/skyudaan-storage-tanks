@@ -311,11 +311,22 @@
       </div>
 
       <!-- Synced Editorial Story Chapter Cards -->
-      <div class="hero-story-overlay">
+      <div class="hero-story-overlay" id="heroStoryOverlay">
+        <!-- Floating Restore Pill when user minimizes cards for 100% 3D viewing -->
+        <button class="restore-chapter-pill font-mono" id="restoreChapterPill" onclick="toggleChapterCards()" title="Restore specification card">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 6h16M4 12h16M4 18h7"/></svg>
+          <span>SHOW SPEC CARD</span>
+        </button>
         
         <!-- Chapter 1: Master Overview (Progress 0% - 20%) -->
         <div class="chapter-card active" id="chapter-1">
-          <div class="chapter-tag">01 / Master Overview</div>
+          <div class="chapter-card-header">
+            <div class="chapter-tag">01 / Master Overview</div>
+            <button class="card-minimize-btn" onclick="toggleChapterCards()" title="Minimize to view full 3D tank">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+              <span>Full 3D</span>
+            </button>
+          </div>
           <h1 class="chapter-title">Engineered for Extreme Industrial Containment.</h1>
           <p class="chapter-desc">
             Custom heavy pressure vessels, cryogenic storage, and atmospheric fuel containment systems engineered to ASME, PESO, and UL codes. Fabricated in Bengaluru for Tier-1 EPC contractors.
@@ -333,7 +344,13 @@
 
         <!-- Chapter 2: Dished Head Metallurgy (Progress 25% - 40%) -->
         <div class="chapter-card" id="chapter-2">
-          <div class="chapter-tag">02 / Cold-Spun Metallurgy</div>
+          <div class="chapter-card-header">
+            <div class="chapter-tag">02 / Cold-Spun Metallurgy</div>
+            <button class="card-minimize-btn" onclick="toggleChapterCards()" title="Minimize to view full 3D tank">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+              <span>Full 3D</span>
+            </button>
+          </div>
           <h2 class="chapter-title">Torispherical & Semi-Ellipsoidal Heads.</h2>
           <p class="chapter-desc">
             Hydraulic cold-spun dished ends formed to eliminate residual hoop stresses. Precision edge beveling ensures flawless weld joint geometry for high-pressure containment.
@@ -347,7 +364,13 @@
 
         <!-- Chapter 3: Submerged Arc Welds (Progress 45% - 65%) -->
         <div class="chapter-card" id="chapter-3">
-          <div class="chapter-tag">03 / Non-Destructive Integrity</div>
+          <div class="chapter-card-header">
+            <div class="chapter-tag">03 / Non-Destructive Integrity</div>
+            <button class="card-minimize-btn" onclick="toggleChapterCards()" title="Minimize to view full 3D tank">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+              <span>Full 3D</span>
+            </button>
+          </div>
           <h2 class="chapter-title">Automated SAW & 100% X-Ray Radiography.</h2>
           <p class="chapter-desc">
             Longitudinal and circumferential seams are welded using automated column-and-boom submerged arc welding. 100% inspected with industrial gamma radiography per ASME UW-51.
@@ -361,7 +384,13 @@
 
         <!-- Chapter 4: Nozzles & Manways (Progress 70% - 85%) -->
         <div class="chapter-card" id="chapter-4">
-          <div class="chapter-tag">04 / Flanging & Access</div>
+          <div class="chapter-card-header">
+            <div class="chapter-tag">04 / Flanging & Access</div>
+            <button class="card-minimize-btn" onclick="toggleChapterCards()" title="Minimize to view full 3D tank">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+              <span>Full 3D</span>
+            </button>
+          </div>
           <h2 class="chapter-title">ANSI B16.5 150# Flanges & 500mm Manway.</h2>
           <p class="chapter-desc">
             Full-bore 500mm inspection manway with forged weld-neck flanges, spiral-wound gaskets, and high-tensile B7 stud bolts. Dual lifting trunnions for safe mobile crane erection.
@@ -375,7 +404,13 @@
 
         <!-- Chapter 5: Structural Saddles (Progress 90% - 100%) -->
         <div class="chapter-card" id="chapter-5">
-          <div class="chapter-tag">05 / Structural Dissipation</div>
+          <div class="chapter-card-header">
+            <div class="chapter-tag">05 / Structural Dissipation</div>
+            <button class="card-minimize-btn" onclick="toggleChapterCards()" title="Minimize to view full 3D tank">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+              <span>Full 3D</span>
+            </button>
+          </div>
           <h2 class="chapter-title">Fabricated Saddles with Wear Plates.</h2>
           <p class="chapter-desc">
             120-degree shell contact angle with full-width wear plates designed to Zick’s analysis method, safely dissipating hydraulic deadweight into reinforced foundation pads.

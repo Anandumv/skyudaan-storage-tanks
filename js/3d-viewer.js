@@ -66,9 +66,9 @@
   const cameraNodes = [
     {
       progress: 0.0,
-      camPos: { x: 22, y: 8.5, z: 22 },
-      target: { x: 0, y: 0, z: 0 },
-      tankRot: { x: 0.02, y: -0.28, z: 0 },
+      camPos: { x: 21, y: 7.5, z: 23 },
+      target: { x: -4.5, y: -0.2, z: 0 },
+      tankRot: { x: 0.02, y: -0.25, z: 0 },
       activeHotspot: null
     },
     {
@@ -87,15 +87,15 @@
     },
     {
       progress: 0.75,
-      camPos: { x: 3.5, y: 11.5, z: 9.5 },
-      target: { x: 0, y: 4.8, z: 0 },
+      camPos: { x: 6.0, y: 11.5, z: 10.5 },
+      target: { x: 2.5, y: 4.8, z: 0 },
       tankRot: { x: -0.28, y: 0.08, z: 0 },
       activeHotspot: 'pin-manway'
     },
     {
       progress: 1.0,
       camPos: { x: 13, y: -2.8, z: 15 },
-      target: { x: 5.2, y: -3.6, z: 0 },
+      target: { x: 4.8, y: -3.6, z: 0 },
       tankRot: { x: 0.18, y: -0.45, z: 0 },
       activeHotspot: 'pin-saddle'
     }
@@ -1187,8 +1187,15 @@
       };
     }
 
-    camera.position.lerp(new THREE.Vector3(targetCamPos.x, targetCamPos.y, targetCamPos.z), 0.08);
-    camera.lookAt(targetLookAt.x, targetLookAt.y, targetLookAt.z);
+    const isMobile = window.innerWidth <= 768;
+    const effectiveLookAtX = isMobile ? (activeOrthoPreset ? targetLookAt.x : 0) : targetLookAt.x;
+    const effectiveLookAtY = isMobile ? (activeOrthoPreset ? targetLookAt.y : targetLookAt.y - 2.2) : targetLookAt.y;
+    const effectiveCamX = isMobile ? (activeOrthoPreset ? targetCamPos.x : targetCamPos.x * 0.85) : targetCamPos.x;
+    const effectiveCamY = isMobile ? (activeOrthoPreset ? targetCamPos.y : targetCamPos.y + 0.6) : targetCamPos.y;
+    const effectiveCamZ = isMobile ? (activeOrthoPreset ? targetCamPos.z : targetCamPos.z * 1.1) : targetCamPos.z;
+
+    camera.position.lerp(new THREE.Vector3(effectiveCamX, effectiveCamY, effectiveCamZ), 0.08);
+    camera.lookAt(effectiveLookAtX, effectiveLookAtY, targetLookAt.z);
 
     if (activeModelGroup) {
       activeModelGroup.rotation.set(
