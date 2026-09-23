@@ -451,16 +451,17 @@ function initNavigation() {
 
   if (mobileMenuBtn && navLinks) {
     mobileMenuBtn.addEventListener('click', () => {
-      const isVisible = navLinks.style.display === 'flex';
-      navLinks.style.display = isVisible ? 'none' : 'flex';
-      navLinks.style.position = isVisible ? 'static' : 'absolute';
-      navLinks.style.top = isVisible ? 'auto' : '100%';
-      navLinks.style.left = 0;
-      navLinks.style.width = '100%';
-      navLinks.style.flexDirection = 'column';
-      navLinks.style.background = '#ffffff';
-      navLinks.style.padding = '1.5rem';
-      navLinks.style.borderBottom = '1px solid var(--border-medium)';
+      const isOpen = navLinks.classList.toggle('active');
+      mobileMenuBtn.classList.toggle('active', isOpen);
+      document.body.style.overflow = isOpen ? 'hidden' : '';
+    });
+
+    navLinks.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        navLinks.classList.remove('active');
+        mobileMenuBtn.classList.remove('active');
+        document.body.style.overflow = '';
+      });
     });
   }
 }

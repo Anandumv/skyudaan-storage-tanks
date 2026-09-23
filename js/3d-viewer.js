@@ -1295,27 +1295,48 @@
       canvas.style.cursor = 'grab';
     });
 
+    let touchStartDist = 0;
+    let initialCamLength = 22;
+
     canvas.addEventListener('touchstart', (e) => {
       lastUserInteractionTime = Date.now();
       if (e.touches.length === 1) {
         isDragging = true;
         previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      } else if (e.touches.length === 2) {
+        isDragging = false;
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        touchStartDist = Math.hypot(dx, dy);
+        initialCamLength = camera.position.length();
       }
     }, { passive: true });
 
     window.addEventListener('touchmove', (e) => {
-      if (!isDragging || e.touches.length !== 1) return;
-      lastUserInteractionTime = Date.now();
-      const deltaX = e.touches[0].clientX - previousMousePosition.x;
-      const deltaY = e.touches[0].clientY - previousMousePosition.y;
-      manualRotation.x += deltaX * 0.006;
-      manualRotation.y += deltaY * 0.006;
-      manualRotation.y = Math.max(-0.6, Math.min(0.6, manualRotation.y));
-      previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      if (e.touches.length === 1 && isDragging) {
+        lastUserInteractionTime = Date.now();
+        const deltaX = e.touches[0].clientX - previousMousePosition.x;
+        const deltaY = e.touches[0].clientY - previousMousePosition.y;
+        manualRotation.x += deltaX * 0.006;
+        manualRotation.y += deltaY * 0.006;
+        manualRotation.y = Math.max(-0.6, Math.min(0.6, manualRotation.y));
+        previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      } else if (e.touches.length === 2 && touchStartDist > 0) {
+        lastUserInteractionTime = Date.now();
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        const dist = Math.hypot(dx, dy);
+        const factor = touchStartDist / Math.max(dist, 1);
+        const targetLen = Math.max(12, Math.min(42, initialCamLength * factor));
+        camera.position.setLength(targetLen);
+      }
     }, { passive: true });
 
-    window.addEventListener('touchend', () => {
-      isDragging = false;
+    window.addEventListener('touchend', (e) => {
+      if (e.touches.length === 0) {
+        isDragging = false;
+        touchStartDist = 0;
+      }
     });
   }
 

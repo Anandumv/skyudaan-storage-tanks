@@ -316,6 +316,35 @@
 @media (max-width: 992px) {
   .configurator-wrapper {
     grid-template-columns: 1fr;
-    padding: 1.5rem;
+    padding: 1.75rem 1.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .configurator-section {
+    padding: 3rem 0;
+  }
+  .configurator-wrapper {
+    padding: 1.25rem 1rem;
+    gap: 1.5rem;
+  }
+  .option-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.4rem;
+  }
+  .specs-data-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+  }
+  .config-actions-row {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+  }
+  .config-actions-row .btn {
+    width: 100%;
+    justify-content: center;
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    min-height: 44px;
   }
 }
