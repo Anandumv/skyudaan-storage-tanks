@@ -5,7 +5,7 @@ Awwwards-targeted one-page site for a Bengaluru pressure-vessel fabricator. Spec
 
 ## Commands
 - `npm run dev` (port 3100) · `npm run build` → static export in `out/` · `npm test` (vitest)
-- Deploy: `vercel deploy --prod` (project `skyudaan-storage-tanks`, vercel.json sets framework + `out`)
+- Deploy: `vercel deploy --prod` (project `skyudaan-storage-tanks`; vercel.json sets framework `nextjs` only — adding `outputDirectory: out` breaks the build)
 - Screenshot QA: serve `out/` (`python3 -m http.server 8932 -d out`) and scroll `#film` to
   `t/9 * (film.offsetHeight - innerHeight)` for chapter t. Wait ~1.8 s per shot (camera damping).
 
