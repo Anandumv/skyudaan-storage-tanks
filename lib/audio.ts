@@ -30,6 +30,7 @@ export class SoundEngine {
   private lastFit = -1;
   private landed = false;
   private resolved = false;
+  private latched = false;
   muted = true;
 
   get started() {
@@ -222,6 +223,12 @@ export class SoundEngine {
     this.landed = saddles >= 1;
     const wipe = seg(t, 7.35, 7.95);
     this.set('spray', wipe > 0 && wipe < 1 ? 0.12 : 0, 0.05);
+
+    const driving = seg(t, 8.32, 8.58);
+    this.set('roll', driving > 0 && driving < 1 ? 0.2 : rolling ? Math.min(speed * 0.35, 0.28) : 0, 0.08);
+    const latched = t > 8.26;
+    if (latched && !this.latched) this.ping(260, 0.22, 1.4);
+    this.latched = latched;
 
     const done = t > 8.1;
     if (done && !this.resolved) this.chord();

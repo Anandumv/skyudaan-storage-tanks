@@ -64,7 +64,7 @@ function scramble(el: HTMLElement, text: string) {
 /** Fixed chapter index + progress ticks + mm ruler, visible only while the film plays. */
 export function Hud() {
   const chapter = useFilm((s) => Math.min(Math.floor(s.t), FILM_END - 1));
-  const hidden = useFilm((s) => s.config > 0.05 || s.t < 0.85);
+  const hidden = useFilm((s) => s.config > 0.05 || s.t < 0.85 || s.t > 8.05);
   const bar = useRef<HTMLSpanElement>(null);
   const ruler = useRef<HTMLDivElement>(null);
   const label = useRef<HTMLSpanElement>(null);

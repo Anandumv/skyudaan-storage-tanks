@@ -21,7 +21,7 @@ const FRAMES: Frame[] = [
   { p: [6.0, 6.4, 7.6], l: [0.4, 0.5, 0], sx: 0.24, sy: 0 }, // 05 nozzles from above
   { p: [0, 0.5, 12], l: [0, 0, 0], sx: 0.24, sy: 0 }, // 06 hydrotest, level with the water
   { p: [10, 2.4, 10], l: [0, -0.4, 0], sx: 0.24, sy: 0 }, // 07 saddles + coat
-  { p: [8.6, 4.2, 13.2], l: [0, -0.3, 0], sx: 0.24, sy: 0 }, // 08 dispatch
+  { p: [8.6, 4.6, 13.2], l: [0, 0.2, 0], sx: 0.24, sy: 0 }, // 08 dispatch, truck + crane
 ];
 
 const v1 = new THREE.Vector3(), v2 = new THREE.Vector3(), look = new THREE.Vector3();
@@ -90,9 +90,13 @@ function Rig() {
       if (t < 1.9) reach = Math.max(reach, 4.3); // flat / half-rolled plate is wider
       // dished heads start 5 units out and slide in across chapter 02
       reach += (1 - smooth(THREE.MathUtils.clamp((t - 2.05) / 0.75, 0, 1))) * (t > 1.9 ? 5 : 0) * Math.sqrt(1 - along * along);
+      // dispatch: the truck (≈11 units long) and the lifted vessel widen and heighten the scene
+      const dispatch = THREE.MathUtils.clamp((t - 8.25) / 0.3, 0, 1);
+      reach = Math.max(reach, lerp(0, 5.8 * Math.sqrt(1 - along * along) + 1.3, dispatch));
+      const reachV = 2.0 + dispatch * 0.9;
       const availW = Math.max(0.3, 0.9 - 2 * Math.abs(sx));
       const availH = Math.max(0.3, 0.84 - 2 * Math.abs(sy));
-      const need = Math.max(reach / (availW * tanH), 2.0 / (availH * tanV));
+      const need = Math.max(reach / (availW * tanH), reachV / (availH * tanV));
       if (dist < need) v1.copy(look).addScaledVector(v2, lerp(need / dist, 1, config) );
     }
 

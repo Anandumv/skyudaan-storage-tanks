@@ -21,6 +21,8 @@ Awwwards-targeted one-page site for a Bengaluru pressure-vessel fabricator. Spec
 - Configurator camera math in `Stage.tsx` must stay in step with vessel stretch/leg offsets in
   `Vessel.tsx` (vertical: L/D ÷ 3 stretch, 0.9 legs, ground at y = -1.6).
 - Clip planes (water level, coat wipe) are world-space: only valid while the root isn't rotated.
+- Dispatch (ch 08): `lifted` group raises vessel+saddles, `shadow` group counter-offsets so the contact shadow stays on the ground; truck deck top is y=-0.6 (vessel rests at lift 1.0). Config mode drives the truck off and lift back to 0.
+- Do NOT add @react-three/postprocessing: bloom breaks ContactShadows on the alpha canvas (grey quad). Arc glow is an additive sprite instead.
 
 ## Content rules
 - All claims come from the original site (`git show ca0cd3a:index.html`). Don't invent specs,

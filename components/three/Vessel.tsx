@@ -97,6 +97,31 @@ function glowTexture() {
   return t;
 }
 
+/** Brushed-steel grain: long streaks along the rolling direction, used as bump + roughness. */
+function brushedTexture() {
+  const c = document.createElement('canvas');
+  c.width = 512;
+  c.height = 512;
+  const g = c.getContext('2d')!;
+  g.fillStyle = '#808080';
+  g.fillRect(0, 0, 512, 512);
+  for (let i = 0; i < 2600; i++) {
+    const y = Math.random() * 512;
+    const v = 100 + Math.random() * 60;
+    g.strokeStyle = `rgba(${v},${v},${v},${0.08 + Math.random() * 0.18})`;
+    g.lineWidth = 0.5 + Math.random() * 1.2;
+    g.beginPath();
+    g.moveTo(-20, y);
+    g.lineTo(532, y + (Math.random() - 0.5) * 2);
+    g.stroke();
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.repeat.set(3, 2);
+  t.anisotropy = 8;
+  return t;
+}
+
 /** Weld spatter: CPU particles thrown from the arc, falling under gravity. */
 function makeSparks() {
   const pos = new Float32Array(SPARKS * 3).fill(-100);
@@ -128,7 +153,14 @@ export function Vessel({ lowDetail = false }: { lowDetail?: boolean }) {
   const glow = useRef<THREE.Sprite>(null!);
   const sparks = useMemo(makeSparks, []);
   const glowMap = useMemo(glowTexture, []);
-  const live = useRef({ s: 1, sx: 1, vert: 0, under: 0, y: 0, saddle: 1, yaw: 0 });
+  const brushed = useMemo(brushedTexture, []);
+  const lifted = useRef<THREE.Group>(null!);
+  const shadow = useRef<THREE.Group>(null!);
+  const truck = useRef<THREE.Group>(null!);
+  const wheels = useRef<THREE.Mesh[]>([]);
+  const crane = useRef<THREE.Group>(null!);
+  const slings = useRef<THREE.Group>(null!);
+  const live = useRef({ s: 1, sx: 1, vert: 0, under: 0, y: 0, saddle: 1, yaw: 0, truckX: 16, lift: 0 });
 
   const segs = lowDetail ? { u: 36, v: 64, r: 48 } : { u: 60, v: 112, r: 96 };
 
@@ -162,7 +194,13 @@ export function Vessel({ lowDetail = false }: { lowDetail?: boolean }) {
     return {
       clipWater,
       clipCoat,
-      steel: new THREE.MeshStandardMaterial({ color: STEEL, metalness: 0.92, roughness: 0.36, side: THREE.DoubleSide, transparent: true }),
+      steel: new THREE.MeshStandardMaterial({ color: STEEL, metalness: 0.92, roughness: 0.34, side: THREE.DoubleSide, transparent: true }),
+      truck: new THREE.MeshStandardMaterial({ color: '#2a2c30', metalness: 0.35, roughness: 0.5 }),
+      cab: new THREE.MeshStandardMaterial({ color: '#34373c', metalness: 0.3, roughness: 0.38 }),
+      glass: new THREE.MeshStandardMaterial({ color: '#9aa6c8', metalness: 0.6, roughness: 0.1 }),
+      tyre: new THREE.MeshStandardMaterial({ color: '#141518', metalness: 0, roughness: 0.9 }),
+      cable: new THREE.MeshStandardMaterial({ color: '#b36a2e', metalness: 0.3, roughness: 0.6 }),
+      hook: new THREE.MeshStandardMaterial({ color: '#e0a000', metalness: 0.4, roughness: 0.45 }),
       fitting: new THREE.MeshStandardMaterial({ color: '#7d838a', metalness: 0.9, roughness: 0.3, transparent: true }),
       seam: new THREE.MeshStandardMaterial({ color: '#6f757b', metalness: 0.8, roughness: 0.55, emissive: ARC, emissiveIntensity: 0 }),
       arc: new THREE.MeshBasicMaterial({ color: '#fff3e0', toneMapped: false }),
@@ -175,6 +213,14 @@ export function Vessel({ lowDetail = false }: { lowDetail?: boolean }) {
       ghost: new THREE.MeshStandardMaterial({ color: '#b9b6ad', metalness: 0, roughness: 0.9, transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide }),
     };
   }, []);
+
+  useLayoutEffect(() => {
+    mat.steel.bumpMap = brushed;
+    mat.steel.bumpScale = 0.6;
+    mat.steel.roughnessMap = brushed;
+    mat.fitting.roughnessMap = brushed;
+    mat.steel.needsUpdate = mat.fitting.needsUpdate = true;
+  }, [mat, brushed]);
 
   useLayoutEffect(() => () => {
     Object.values(geo).forEach((g) => g instanceof THREE.BufferGeometry && g.dispose());
@@ -232,7 +278,7 @@ export function Vessel({ lowDetail = false }: { lowDetail?: boolean }) {
       arcLight.current.position.copy(h);
       arc.current.scale.setScalar(0.9 + Math.random() * 0.5);
       glow.current.position.copy(h);
-      glow.current.scale.setScalar(0.45 + Math.random() * 0.35);
+      glow.current.scale.setScalar(0.7 + Math.random() * 0.5);
       // spawn spatter at ~300/s, thrown outward from the shell and upward
       sparks.carry += dt * 300;
       const n = Math.floor(sparks.carry);
@@ -300,9 +346,28 @@ export function Vessel({ lowDetail = false }: { lowDetail?: boolean }) {
     mat.clipCoat.constant = wipe >= 1 ? 100 : lerp(-HALF - 0.8, HALF + 0.8, smooth(wipe));
     coat.current.visible = wipe > 0;
 
+    const L = live.current;
+    // 08 Dispatch: hook in, lift, truck in, set down, hook out ---------------------
+    const hookIn = smooth(seg(t, 8.0, 8.25));
+    const hookOut = smooth(seg(t, 8.72, 8.92));
+    const up = smooth(seg(t, 8.28, 8.45));
+    const down = smooth(seg(t, 8.58, 8.72));
+    const filmLift = up * 1.9 - down * 0.9; // ends resting on the deck at +1.0
+    const truckIn = smooth(seg(t, 8.32, 8.58));
+    L.truckX = damp(L.truckX, config > 0.02 ? -18 : lerp(16, 0, truckIn), config > 0.02 ? 1.6 : 8, dt);
+    L.lift = damp(L.lift, config > 0.02 ? 0 : filmLift, config > 0.02 ? 3 : 10, dt);
+    lifted.current.position.y = L.lift;
+    shadow.current.position.y = -L.lift; // shadow stays on the ground
+    truck.current.visible = L.truckX < 15.5 && L.truckX > -17.5;
+    truck.current.position.x = L.truckX;
+    wheels.current.forEach((w) => (w.rotation.y = -L.truckX / 0.42));
+    const hookY = lerp(9, 2.35, hookIn) + hookOut * 9 + L.lift * (1 - hookOut);
+    crane.current.visible = hookIn > 0.001 && hookOut < 0.999 && config < 0.02;
+    crane.current.position.y = hookY;
+    slings.current.visible = up > 0 && down < 1;
+
     // 08 Dispatch turntable + configurator ---------------------------------------
     const turn = smooth(seg(t, 8.0, 9.0)) * Math.PI * 0.35 + config * 0.35;
-    const L = live.current;
     const horiz = isHorizontal(vessel.orientation);
     const ld = horiz ? 3 : vessel.application === 'silo' ? 3.5 : 2;
     const sizeT = config > 0 ? THREE.MathUtils.clamp(Math.cbrt(vessel.capacityLiters / 25000), 0.72, 1.3) : 1;
@@ -362,6 +427,7 @@ export function Vessel({ lowDetail = false }: { lowDetail?: boolean }) {
 
   return (
     <group ref={root}>
+      <group ref={lifted}>
       <group ref={body}>
         <mesh ref={plate} geometry={geo.plateGeo} material={mat.steel} castShadow />
         <mesh ref={headL} geometry={geo.head} material={mat.steel} rotation-z={Math.PI / 2} castShadow />
@@ -418,14 +484,24 @@ export function Vessel({ lowDetail = false }: { lowDetail?: boolean }) {
         </mesh>
       </group>
 
+      <group ref={slings} visible={false}>
+        {[-1, 1].map((d) => (
+          <mesh key={d} material={mat.cable} position={[d * 0.9, 1.675, 0]} rotation-z={d * 0.9273}>
+            <cylinderGeometry args={[0.02, 0.02, 2.2500, 8]} />
+          </mesh>
+        ))}
+      </group>
       <group ref={saddles} position-y={-1.6}>
         {[-2, 2].map((x) => (
           <mesh key={x} geometry={geo.saddle} material={mat.saddle} position={[x, 1.6, 0]} castShadow />
         ))}
       </group>
 
+      </group>
+      <group ref={shadow}>
       <ContactShadows position={[0, -1.61, 0]} scale={16} blur={2.6} opacity={0.42} far={4} resolution={lowDetail ? 256 : 512} color="#2b2a26" />
 
+      </group>
       <group ref={legs} position-y={-1.6}>
         {[0, 1, 2, 3].map((i) => {
           const a = (i / 4) * Math.PI * 2 + Math.PI / 4;
@@ -435,6 +511,50 @@ export function Vessel({ lowDetail = false }: { lowDetail?: boolean }) {
             </mesh>
           );
         })}
+      </group>
+
+      <group ref={truck} position-x={16} visible={false}>
+        <mesh material={mat.truck} position={[0.4, -0.725, 0]} castShadow>
+          <boxGeometry args={[9.2, 0.25, 2.5]} />
+        </mesh>
+        <mesh material={mat.truck} position={[-0.6, -1.0, 0]}>
+          <boxGeometry args={[10.6, 0.3, 1.1]} />
+        </mesh>
+        <mesh material={mat.cab} position={[-5.35, -0.15, 0]} castShadow>
+          <boxGeometry args={[1.7, 1.9, 2.5]} />
+        </mesh>
+        <mesh material={mat.band} position={[-5.35, -0.55, 0]}>
+          <boxGeometry args={[1.72, 0.12, 2.52]} />
+        </mesh>
+        <mesh material={mat.glass} position={[-6.21, 0.2, 0]}>
+          <boxGeometry args={[0.02, 0.8, 2.2]} />
+        </mesh>
+        {[-5.2, -2.6, -1.7, 2.4, 3.3].flatMap((x, i) =>
+          [-1, 1].map((z) => (
+            <mesh
+              key={`${i}${z}`}
+              ref={(m) => { if (m) wheels.current[i * 2 + (z > 0 ? 1 : 0)] = m; }}
+              material={mat.tyre}
+              position={[x, -1.18, z * 1.05]}
+              rotation-x={Math.PI / 2}
+              castShadow
+            >
+              <cylinderGeometry args={[0.42, 0.42, 0.34, 24]} />
+            </mesh>
+          )),
+        )}
+      </group>
+
+      <group ref={crane} visible={false}>
+        <mesh material={mat.cable} position={[0, 10.3, 0]}>
+          <cylinderGeometry args={[0.025, 0.025, 20, 8]} />
+        </mesh>
+        <mesh material={mat.hook} position={[0, 0.35, 0]} castShadow>
+          <boxGeometry args={[0.5, 0.6, 0.34]} />
+        </mesh>
+        <mesh material={mat.hook} position={[0, -0.05, 0]} rotation-x={Math.PI / 2}>
+          <torusGeometry args={[0.16, 0.05, 10, 24, Math.PI * 1.5]} />
+        </mesh>
       </group>
     </group>
   );
