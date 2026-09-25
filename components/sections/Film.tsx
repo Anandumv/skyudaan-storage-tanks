@@ -154,6 +154,17 @@ export function Film() {
                     ))}
                   </dl>
                 )}
+                {c.gain && (
+                  <p className="gain">
+                    <span className="mono">For your plant</span>
+                    {c.gain}
+                  </p>
+                )}
+                {CHAPTERS[i].id === 'dispatch' && (
+                  <div className="cta-row">
+                    <button className="btn btn--ink" onClick={() => scrollToId('configure')}>This one could be yours →</button>
+                  </div>
+                )}
                 {i === 0 && (
                   <div className="cta-row">
                     <button className="btn btn--ink" onClick={() => scrollToId('configure')}>Configure a vessel</button>

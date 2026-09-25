@@ -1,6 +1,7 @@
 'use client';
 
-import { useMemo, useRef, type PointerEvent as ReactPointerEvent } from 'react';
+import { useEffect, useMemo, useRef, type PointerEvent as ReactPointerEvent } from 'react';
+import { INCLUDED } from '@/lib/content';
 import { sound } from '@/lib/audio';
 import {
   ACCESSORIES,
@@ -8,6 +9,7 @@ import {
   MOCS,
   ORIENTATIONS,
   calculate,
+  configCode,
   formatInr,
   formatNum,
   gaDrawingSvg,
@@ -16,10 +18,32 @@ import {
 import { useFilm } from '@/lib/store';
 import { scrollToId } from '../ScrollDriver';
 
+/** Price that counts to its new value, like an odometer. */
+export function AnimatedInr({ value }: { value: number }) {
+  const el = useRef<HTMLSpanElement>(null);
+  const shown = useRef(value);
+  useEffect(() => {
+    const from = shown.current;
+    const start = performance.now();
+    let raf = 0;
+    const run = (now: number) => {
+      const p = Math.min(1, (now - start) / 700);
+      const e = 1 - Math.pow(1 - p, 3);
+      shown.current = Math.round((from + (value - from) * e) / 1000) * 1000;
+      if (el.current) el.current.textContent = formatInr(shown.current);
+      if (p < 1) raf = requestAnimationFrame(run);
+    };
+    raf = requestAnimationFrame(run);
+    return () => cancelAnimationFrame(raf);
+  }, [value]);
+  return <span ref={el}>{formatInr(value)}</span>;
+}
+
 export function specSummary(c: VesselConfig) {
   const r = calculate(c);
   const acc = ACCESSORIES.filter((a) => c.accessories[a.id]).map((a) => a.label);
   return [
+    `Configuration: ${configCode(c)}`,
     `Application: ${APPLICATIONS.find((a) => a.id === c.application)!.label}`,
     `Orientation: ${ORIENTATIONS.find((o) => o.id === c.orientation)!.label}`,
     `Capacity: ${formatNum(c.capacityLiters)} L`,
@@ -160,13 +184,23 @@ export function Configurator() {
           <div><dt className="mono">Shell / heads</dt><dd>{r.shellThkMm} / {r.headThkMm} mm</dd></div>
           <div><dt className="mono">Tare (est.)</dt><dd>~{formatNum(r.emptyWeightKg)} kg</dd></div>
           <div><dt className="mono">Design code</dt><dd>{r.designCode}</dd></div>
-          <div className="readout-price"><dt className="mono">Indicative ex-works</dt><dd>{formatInr(r.estPriceInr)}</dd></div>
         </dl>
-        <p className="fine">Indicative sizing and budget only. A firm quote follows a review of your duty, codes and site conditions.</p>
 
-        <div className="cta-row">
-          <button className="btn btn--ink" onClick={sendToRfq}>Send this spec for a quote</button>
-          <button className="btn btn--line" onClick={download}>Download GA drawing (.svg)</button>
+        <div className="buildsheet">
+          <div className="buildsheet-head">
+            <span className="mono">Your vessel</span>
+            <span className="mono buildsheet-code">{configCode(vessel)}</span>
+          </div>
+          <p className="buildsheet-price">
+            <AnimatedInr value={r.estPriceInr} />
+            <small className="mono">Indicative · ex-works</small>
+          </p>
+          <ul className="included">
+            {INCLUDED.map((x) => <li key={x}>{x}</li>)}
+          </ul>
+          <button className="btn btn--ink btn--wide" onClick={sendToRfq}>Get a firm quote for this vessel →</button>
+          <button className="btn btn--line btn--wide" onClick={download}>Download GA drawing (.svg)</button>
+          <p className="fine">Indicative sizing and budget. The firm quote follows an engineer’s review of your duty, codes and site.</p>
         </div>
       </div>
     </section>

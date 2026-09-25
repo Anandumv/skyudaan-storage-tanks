@@ -183,3 +183,10 @@ ${tb}
 <text x="48" y="${H - 44}" class="k">YELAHANKA, BENGALURU · INDICATIVE SIZING FOR RFQ — NOT FOR CONSTRUCTION</text>
 </svg>`;
 }
+
+/** Short, readable code for a configuration, e.g. SU-H25-IS. Not a catalogue number. */
+export function configCode(c: VesselConfig) {
+  const o = { horizontal: 'H', vertical: 'V', underground: 'U' }[c.orientation];
+  const m = { is2062: 'IS', ss304: 'S4', ss316: 'S6', sa516: 'SA' }[c.moc];
+  return `SU-${o}${Math.round(c.capacityLiters / 1000)}-${m}`;
+}

@@ -2,7 +2,10 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { sound } from '@/lib/audio';
+import { calculate, configCode, formatNum } from '@/lib/engineering';
 import { useFilm } from '@/lib/store';
+import { AnimatedInr, specSummary } from '../sections/Configurator';
+import { scrollToId } from '../ScrollDriver';
 
 const KEY = 'su-entered';
 
@@ -211,5 +214,48 @@ export function Cursor() {
         <span ref={label} className="mono" />
       </div>
     </>
+  );
+}
+
+/** Follows the visitor once they have a vessel configured, until they reach the quote form. */
+export function QuoteBar() {
+  const vessel = useFilm((s) => s.vessel);
+  const past = useFilm((s) => s.config > 0.98);
+  const [atForm, setAtForm] = useState(false);
+  const [inConfig, setInConfig] = useState(false);
+  useEffect(() => {
+    const works = document.getElementById('works');
+    const cfg = document.getElementById('configure');
+    if (!works || !cfg) return;
+    const io = new IntersectionObserver(([e]) => setAtForm(e.isIntersecting), { rootMargin: '0px 0px -30% 0px' });
+    // the configurator carries its own quote button
+    const io2 = new IntersectionObserver(([e]) => setInConfig(e.isIntersecting), { rootMargin: '0px 0px -40% 0px' });
+    io.observe(works);
+    io2.observe(cfg);
+    return () => {
+      io.disconnect();
+      io2.disconnect();
+    };
+  }, []);
+  const r = calculate(vessel);
+  const show = past && !inConfig && !atForm;
+  return (
+    <aside className={show ? 'quotebar is-on' : 'quotebar'} aria-hidden={!show} aria-label="Your configured vessel">
+      <span className="mono quotebar-code">{configCode(vessel)}</span>
+      <span className="quotebar-spec">
+        {formatNum(vessel.capacityLiters)} L · Ø {formatNum(r.diameterMm)} × {formatNum(r.lengthMm)} mm
+      </span>
+      <span className="quotebar-price"><AnimatedInr value={r.estPriceInr} /></span>
+      <button
+        className="btn btn--ink btn--sm"
+        tabIndex={show ? 0 : -1}
+        onClick={() => {
+          window.dispatchEvent(new CustomEvent('rfq:prefill', { detail: specSummary(vessel) }));
+          scrollToId('rfq');
+        }}
+      >
+        Get firm quote →
+      </button>
+    </aside>
   );
 }

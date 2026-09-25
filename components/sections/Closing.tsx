@@ -2,8 +2,20 @@
 
 import { useEffect, useState, type FormEvent } from 'react';
 import { COMPANY, INSPECTORS, PRODUCTS } from '@/lib/content';
+import { defaultConfig } from '@/lib/engineering';
+import { useFilm } from '@/lib/store';
+import { scrollToId } from '../ScrollDriver';
 
 export function Products() {
+  const pick = (p: (typeof PRODUCTS)[number]) => {
+    if (p.preset) {
+      useFilm.getState().setVessel({ ...p.preset, accessories: defaultConfig.accessories });
+      scrollToId('configure');
+    } else {
+      window.dispatchEvent(new CustomEvent('rfq:prefill', { detail: `Enquiry: ${p.name}\n` }));
+      scrollToId('rfq');
+    }
+  };
   return (
     <section id="products" className="sheet products" aria-labelledby="products-title">
       <header className="sheet-head">
@@ -15,11 +27,13 @@ export function Products() {
       </header>
       <ol className="index">
         {PRODUCTS.map((p, i) => (
-          <li key={p.name} className="index-row" data-fade>
-            <span className="index-num mono">{String(i + 1).padStart(2, '0')}</span>
-            <span className="index-name">{p.name}</span>
-            <span className="index-group mono">{p.group}</span>
-            <span className="index-code mono">{p.code}</span>
+          <li key={p.name} data-fade>
+            <button className="index-row" onClick={() => pick(p)}>
+              <span className="index-num mono">{String(i + 1).padStart(2, '0')}</span>
+              <span className="index-name">{p.name}</span>
+              <span className="index-code mono">{p.code}</span>
+              <span className="index-go mono">{p.preset ? 'Configure →' : 'Enquire →'}</span>
+            </button>
           </li>
         ))}
       </ol>
@@ -91,6 +105,12 @@ export function Works() {
           <textarea name="note" rows={6} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Medium, capacity, design pressure, MOC, codes, site…" />
         </label>
         <button className="btn btn--ink btn--wide" type="submit">Continue in WhatsApp →</button>
+        <a className="btn btn--line btn--wide" href={COMPANY.phoneHref}>Or call {COMPANY.phone}</a>
+        <ol className="next-steps">
+          <li><span className="mono">01</span>Our estimating engineers review your duty, codes and site.</li>
+          <li><span className="mono">02</span>You receive a GA drawing and a firm, itemised quote.</li>
+          <li><span className="mono">03</span>Fabrication with stage-wise inspection open to your QA, then dispatch.</li>
+        </ol>
         {sent && <p className="fine" role="status">WhatsApp opened in a new tab. If it didn’t, call <a href={COMPANY.phoneHref}>{COMPANY.phone}</a>.</p>}
       </form>
     </section>
