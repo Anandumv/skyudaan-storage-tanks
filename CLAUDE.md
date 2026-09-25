@@ -15,6 +15,8 @@ Awwwards-targeted one-page site for a Bengaluru pressure-vessel fabricator. Spec
 - Chapter i owns `t ∈ [i, i+1]` (`lib/film.ts`). Every part in `components/three/Vessel.tsx`
   is a pure function of `t` via `seg(t, a, b)` windows — keep it that way (scrubbable both ways).
 - Camera keyframes live in `FRAMES` in `components/three/Stage.tsx`; `sx/sy` shift the scene
+  with `setViewOffset`. After keyframes, an aspect-aware fit pulls the camera back so the whole
+  vessel stays inside the free screen area on any viewport — never hand-tune FRAMES for one size.
   with `setViewOffset` so text owns the left 40 % (desktop) / bottom sheet (mobile).
 - Configurator camera math in `Stage.tsx` must stay in step with vessel stretch/leg offsets in
   `Vessel.tsx` (vertical: L/D ÷ 3 stretch, 0.9 legs, ground at y = -1.6).

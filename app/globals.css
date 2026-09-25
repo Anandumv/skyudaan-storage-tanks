@@ -567,3 +567,9 @@ button.index-row { width: 100%; background: none; border: 0; border-bottom: 1px 
   .quotebar-spec, .quotebar-code { display: none; }
   .quotebar .btn { margin-left: auto; }
 }
+
+/* short laptop screens: the chapter card needs the full height */
+@media (max-height: 800px) and (min-width: 821px) {
+  .hud-index, .hud-track { display: none; }
+  .chapter-sticky { padding-top: calc(var(--nav-h) - 8px); }
+}

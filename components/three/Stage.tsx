@@ -77,6 +77,25 @@ function Rig() {
       sy = lerp(-0.17, 0.34, hero);
     }
 
+    // Fit: pull back until the whole vessel sits inside the free part of the screen
+    // (right of the text on desktop, above the sheet on mobile), whatever the aspect ratio.
+    if (config < 1) {
+      const cam = camera as THREE.PerspectiveCamera;
+      const tanV = Math.tan(THREE.MathUtils.degToRad(cam.fov / 2));
+      const tanH = tanV * (size.width / size.height);
+      v2.copy(v1).sub(look);
+      const dist = v2.length();
+      const along = Math.abs(v2.x) / dist; // how end-on we look down the vessel axis
+      let reach = 3.7 * Math.sqrt(1 - along * along) + 1.15; // half-width seen on screen
+      if (t < 1.9) reach = Math.max(reach, 4.3); // flat / half-rolled plate is wider
+      // dished heads start 5 units out and slide in across chapter 02
+      reach += (1 - smooth(THREE.MathUtils.clamp((t - 2.05) / 0.75, 0, 1))) * (t > 1.9 ? 5 : 0) * Math.sqrt(1 - along * along);
+      const availW = Math.max(0.3, 0.9 - 2 * Math.abs(sx));
+      const availH = Math.max(0.3, 0.84 - 2 * Math.abs(sy));
+      const need = Math.max(reach / (availW * tanH), 2.0 / (availH * tanV));
+      if (dist < need) v1.copy(look).addScaledVector(v2, lerp(need / dist, 1, config) );
+    }
+
     // a little life from the pointer
     v1.x += pointer.x * 0.35;
     v1.y -= pointer.y * 0.2;
