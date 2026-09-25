@@ -2,7 +2,7 @@
 
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Environment, Lightformer } from '@react-three/drei';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { FILM_END, lerp, smooth } from '@/lib/film';
 import { isHorizontal } from '@/lib/engineering';
@@ -100,6 +100,17 @@ function Rig() {
   return null;
 }
 
+/** Flags the first rendered frame so the entry gate can finish counting. */
+function ReadySignal() {
+  const done = useRef(false);
+  useFrame(() => {
+    if (done.current) return;
+    done.current = true;
+    requestAnimationFrame(() => useFilm.setState({ stageReady: true }));
+  });
+  return null;
+}
+
 function Studio() {
   return (
     <Environment resolution={256} frames={1}>
@@ -135,6 +146,7 @@ export default function Stage() {
       camera={{ fov: 32, near: 0.1, far: 80, position: [3.2, 6.6, 7.4] }}
     >
       <Rig />
+      <ReadySignal />
       <Studio />
       <ambientLight intensity={0.35} />
       <directionalLight position={[4, 8, 5]} intensity={1.1} />

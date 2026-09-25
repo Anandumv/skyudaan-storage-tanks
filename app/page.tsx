@@ -4,6 +4,7 @@ import { Configurator } from '@/components/sections/Configurator';
 import { Film } from '@/components/sections/Film';
 import { Footer, Products, Works } from '@/components/sections/Closing';
 import { Hud, Nav } from '@/components/ui/Chrome';
+import { Cursor, Gate, SoundLoop } from '@/components/ui/Experience';
 
 export default function Home() {
   return (
@@ -20,6 +21,9 @@ export default function Home() {
       </main>
       <Footer />
       <ScrollDriver />
+      <SoundLoop />
+      <Cursor />
+      <Gate />
     </>
   );
 }

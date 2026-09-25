@@ -1,6 +1,7 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useRef, type PointerEvent as ReactPointerEvent } from 'react';
+import { sound } from '@/lib/audio';
 import {
   ACCESSORIES,
   APPLICATIONS,
@@ -50,7 +51,20 @@ function Segmented<T extends string>({ label, value, options, onChange }: { labe
 
 export function Configurator() {
   const vessel = useFilm((s) => s.vessel);
-  const setVessel = useFilm((s) => s.setVessel);
+  const setRaw = useFilm((s) => s.setVessel);
+  const setVessel: typeof setRaw = (patch) => {
+    sound?.tick();
+    setRaw(patch);
+  };
+  const drag = useRef<{ x: number; yaw: number } | null>(null);
+  const onDown = (e: ReactPointerEvent<HTMLDivElement>) => {
+    drag.current = { x: e.clientX, yaw: useFilm.getState().yaw };
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+  const onMove = (e: ReactPointerEvent<HTMLDivElement>) => {
+    if (drag.current) useFilm.setState({ yaw: drag.current.yaw + (e.clientX - drag.current.x) * 0.01 });
+  };
+  const onUp = () => (drag.current = null);
   const r = useMemo(() => calculate(vessel), [vessel]);
 
   const download = () => {
@@ -70,7 +84,7 @@ export function Configurator() {
 
   return (
     <section id="configure" className="configure" aria-labelledby="configure-title">
-      <div className="configure-stage" aria-hidden>
+      <div className="configure-stage" aria-hidden data-cursor="Drag" onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}>
         <div className="configure-dims mono">
           <span>Ø {formatNum(r.diameterMm)} mm</span>
           <span>T/T {formatNum(r.lengthMm)} mm</span>

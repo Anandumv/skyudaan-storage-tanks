@@ -24,6 +24,9 @@ export function ScrollDriver() {
       gsap.ticker.lagSmoothing(0);
       (window as unknown as { __lenis?: Lenis }).__lenis = lenis;
     }
+    const gate = (entered: boolean) => (entered ? lenis?.start() : lenis?.stop());
+    gate(useFilm.getState().entered);
+    const unsub = useFilm.subscribe((s, prev) => s.entered !== prev.entered && gate(s.entered));
 
     const ctx = gsap.context(() => {
       // Film clock ------------------------------------------------------------
@@ -92,6 +95,7 @@ export function ScrollDriver() {
     document.documentElement.classList.add('js-ready');
 
     return () => {
+      unsub();
       ctx.revert();
       gsap.ticker.remove(tick);
       lenis?.destroy();

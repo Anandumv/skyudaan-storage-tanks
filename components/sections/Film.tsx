@@ -124,7 +124,7 @@ function Numbers() {
 
 export function Film() {
   return (
-    <section id="film" aria-label="How a SkyUdaan vessel is made">
+    <section id="film" aria-label="How a SkyUdaan vessel is made" data-cursor="Scroll">
       {CHAPTER_COPY.map((c, i) => {
         const Heading = i === 0 ? 'h1' : 'h2';
         return (

@@ -25,6 +25,8 @@ Awwwards-targeted one-page site for a Bengaluru pressure-vessel fabricator. Spec
   clients, or certificates. The legacy "sample MTR certificate" was dropped on purpose.
 - Engineering estimator (`lib/engineering.ts`) is a verbatim port; tests pin legacy outputs.
 - Hero h1 uses a CSS reveal, not SplitText — SplitText re-creates nodes and delays LCP.
+- Entry gate (`components/ui/Experience.tsx`) locks scroll until entered; skipped for the session once passed or when the URL has a hash. Hero CSS reveal is paused until `html.entered`.
+- Sound is procedural WebAudio in `lib/audio.ts`, driven by `t` — no audio files. It only starts from the gate or nav toggle (a user gesture is required).
 
 ## Open with owner
 - WhatsApp/phone `+91 79426 38063` looks like an IndiaMART forwarding number.

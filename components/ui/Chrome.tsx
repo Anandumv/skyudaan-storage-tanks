@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { CHAPTERS, FILM_END } from '@/lib/film';
 import { useFilm } from '@/lib/store';
 import { scrollToId } from '../ScrollDriver';
+import { SoundToggle } from './Experience';
 
 const LINKS = [
   ['film', 'Process'],
@@ -31,6 +32,7 @@ export function Nav() {
           </a>
         ))}
       </nav>
+      <SoundToggle />
       <a href="#rfq" className="btn btn--ink btn--sm" onClick={(e) => { e.preventDefault(); go('rfq'); }}>
         Request quote
       </a>
@@ -42,12 +44,34 @@ export function Nav() {
   );
 }
 
+const GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/#·';
+
+/** Instrument-style text scramble that resolves left to right. */
+function scramble(el: HTMLElement, text: string) {
+  const start = performance.now();
+  const run = (now: number) => {
+    const p = Math.min(1, (now - start) / 420);
+    const fixed = Math.floor(p * text.length);
+    el.textContent = text
+      .split('')
+      .map((c, i) => (i < fixed || c === ' ' ? c : GLYPHS[(Math.random() * GLYPHS.length) | 0]))
+      .join('');
+    if (p < 1) requestAnimationFrame(run);
+  };
+  requestAnimationFrame(run);
+}
+
 /** Fixed chapter index + progress ticks + mm ruler, visible only while the film plays. */
 export function Hud() {
   const chapter = useFilm((s) => Math.min(Math.floor(s.t), FILM_END - 1));
   const hidden = useFilm((s) => s.config > 0.05 || s.t < 0.85);
   const bar = useRef<HTMLSpanElement>(null);
   const ruler = useRef<HTMLDivElement>(null);
+  const label = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    if (label.current) scramble(label.current, CHAPTERS[chapter].label.toUpperCase());
+  }, [chapter]);
 
   useEffect(
     () =>
@@ -63,7 +87,7 @@ export function Hud() {
       <div className="hud-index mono">
         <span className="hud-num">{String(chapter).padStart(2, '0')}</span>
         <span className="hud-of">/ {String(FILM_END - 1).padStart(2, '0')}</span>
-        <span className="hud-label">{CHAPTERS[chapter].label}</span>
+        <span ref={label} className="hud-label">{CHAPTERS[0].label}</span>
       </div>
       <div className="hud-track">
         <span ref={bar} className="hud-bar" />

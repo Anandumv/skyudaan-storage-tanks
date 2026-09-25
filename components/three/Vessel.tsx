@@ -78,6 +78,35 @@ function bendPlate(geo: THREE.BufferGeometry, base: Float32Array, b: number) {
 
 const damp = THREE.MathUtils.damp;
 
+const SPARKS = 220;
+const GRAVITY = -6;
+
+function glowTexture() {
+  const c = document.createElement('canvas');
+  c.width = c.height = 128;
+  const g = c.getContext('2d')!;
+  const r = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  r.addColorStop(0, 'rgba(255,250,235,1)');
+  r.addColorStop(0.18, 'rgba(255,190,120,0.85)');
+  r.addColorStop(0.5, 'rgba(255,91,31,0.25)');
+  r.addColorStop(1, 'rgba(255,91,31,0)');
+  g.fillStyle = r;
+  g.fillRect(0, 0, 128, 128);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+
+/** Weld spatter: CPU particles thrown from the arc, falling under gravity. */
+function makeSparks() {
+  const pos = new Float32Array(SPARKS * 3).fill(-100);
+  const vel = new Float32Array(SPARKS * 3);
+  const life = new Float32Array(SPARKS);
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  return { geo, pos, vel, life, next: 0, carry: 0 };
+}
+
 export function Vessel({ lowDetail = false }: { lowDetail?: boolean }) {
   const root = useRef<THREE.Group>(null!);
   const body = useRef<THREE.Group>(null!);
@@ -95,7 +124,11 @@ export function Vessel({ lowDetail = false }: { lowDetail?: boolean }) {
   const outer = useRef<THREE.Mesh>(null!);
   const coat = useRef<THREE.Group>(null!);
   const lastBend = useRef(-1);
-  const live = useRef({ s: 1, sx: 1, vert: 0, under: 0, y: 0, saddle: 1 });
+  const sparkPts = useRef<THREE.Points>(null!);
+  const glow = useRef<THREE.Sprite>(null!);
+  const sparks = useMemo(makeSparks, []);
+  const glowMap = useMemo(glowTexture, []);
+  const live = useRef({ s: 1, sx: 1, vert: 0, under: 0, y: 0, saddle: 1, yaw: 0 });
 
   const segs = lowDetail ? { u: 36, v: 64, r: 48 } : { u: 60, v: 112, r: 96 };
 
@@ -192,11 +225,47 @@ export function Vessel({ lowDetail = false }: { lowDetail?: boolean }) {
     mat.seam.emissiveIntensity = heat * 2.2;
     arc.current.visible = !!head;
     arcLight.current.intensity = head ? 6 + Math.sin(time * 60) * 2 : 0;
+    glow.current.visible = !!head;
     if (head) {
-      arc.current.position.copy(head);
-      arcLight.current.position.copy(head);
+      const h = head as THREE.Vector3;
+      arc.current.position.copy(h);
+      arcLight.current.position.copy(h);
       arc.current.scale.setScalar(0.9 + Math.random() * 0.5);
+      glow.current.position.copy(h);
+      glow.current.scale.setScalar(0.45 + Math.random() * 0.35);
+      // spawn spatter at ~300/s, thrown outward from the shell and upward
+      sparks.carry += dt * 300;
+      const n = Math.floor(sparks.carry);
+      sparks.carry -= n;
+      for (let k = 0; k < n; k++) {
+        const i = sparks.next;
+        sparks.next = (sparks.next + 1) % SPARKS;
+        const out = Math.hypot(h.y, h.z) || 1;
+        const sp = 1.2 + Math.random() * 2.6;
+        sparks.pos.set([h.x, h.y, h.z], i * 3);
+        sparks.vel[i * 3] = (Math.random() - 0.5) * 2.4;
+        sparks.vel[i * 3 + 1] = (h.y / out) * sp * 0.8 + Math.random() * 1.6;
+        sparks.vel[i * 3 + 2] = (h.z / out) * sp + (Math.random() - 0.5) * 1.2;
+        sparks.life[i] = 0.25 + Math.random() * 0.5;
+      }
     }
+    let alive = false;
+    for (let i = 0; i < SPARKS; i++) {
+      if (sparks.life[i] <= 0) continue;
+      sparks.life[i] -= dt;
+      const o = i * 3;
+      if (sparks.life[i] <= 0) {
+        sparks.pos[o + 1] = -100;
+        continue;
+      }
+      alive = true;
+      sparks.vel[o + 1] += GRAVITY * dt;
+      sparks.pos[o] += sparks.vel[o] * dt;
+      sparks.pos[o + 1] += sparks.vel[o + 1] * dt;
+      sparks.pos[o + 2] += sparks.vel[o + 2] * dt;
+    }
+    sparkPts.current.visible = alive;
+    if (alive) sparks.geo.attributes.position.needsUpdate = true;
 
     // 04 Radiography --------------------------------------------------------------
     const xp = seg(t, 4.08, 4.92);
@@ -244,7 +313,8 @@ export function Vessel({ lowDetail = false }: { lowDetail?: boolean }) {
     L.saddle = damp(L.saddle, 1 - L.vert, 6, dt);
 
     root.current.scale.setScalar(L.s);
-    root.current.rotation.y = turn * (1 - L.vert);
+    L.yaw = damp(L.yaw, config > 0 ? useFilm.getState().yaw : 0, 6, dt);
+    root.current.rotation.y = turn * (1 - L.vert) + L.yaw;
     body.current.scale.set(L.sx, 1, 1);
     body.current.rotation.z = (L.vert * Math.PI) / 2;
     // stand vertical vessels on their legs: bottom head apex sits 0.9 above the slab
@@ -303,6 +373,12 @@ export function Vessel({ lowDetail = false }: { lowDetail?: boolean }) {
         <mesh ref={arc} material={mat.arc}>
           <sphereGeometry args={[0.05, 12, 12]} />
         </mesh>
+        <sprite ref={glow} visible={false}>
+          <spriteMaterial map={glowMap} blending={THREE.AdditiveBlending} depthWrite={false} toneMapped={false} transparent />
+        </sprite>
+        <points ref={sparkPts} geometry={sparks.geo} frustumCulled={false}>
+          <pointsMaterial color="#ffc27a" size={0.045} sizeAttenuation transparent blending={THREE.AdditiveBlending} depthWrite={false} toneMapped={false} />
+        </points>
         <pointLight ref={arcLight} color={ARC} distance={3.5} decay={2} intensity={0} />
 
         <group ref={xray}>

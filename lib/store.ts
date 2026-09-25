@@ -8,6 +8,13 @@ interface State {
   config: number;
   /** Canvas is on screen (later sections cover it). */
   visible: boolean;
+  /** The visitor has passed the entry gate. */
+  entered: boolean;
+  /** WebGL has drawn its first frame. */
+  stageReady: boolean;
+  sound: boolean;
+  /** Extra yaw from dragging the vessel in the configurator (radians). */
+  yaw: number;
   vessel: VesselConfig;
   setVessel: (patch: Partial<VesselConfig>) => void;
 }
@@ -16,6 +23,10 @@ export const useFilm = create<State>((set) => ({
   t: 0,
   config: 0,
   visible: true,
+  entered: false,
+  stageReady: false,
+  sound: false,
+  yaw: 0,
   vessel: defaultConfig,
   setVessel: (patch) => set((s) => ({ vessel: { ...s.vessel, ...patch } })),
 }));
