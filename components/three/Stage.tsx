@@ -92,7 +92,8 @@ function Rig() {
       reach += (1 - smooth(THREE.MathUtils.clamp((t - 2.05) / 0.75, 0, 1))) * (t > 1.9 ? 5 : 0) * Math.sqrt(1 - along * along);
       // dispatch: the truck (≈11 units long) and the lifted vessel widen and heighten the scene
       const dispatch = THREE.MathUtils.clamp((t - 8.25) / 0.3, 0, 1);
-      reach = Math.max(reach, lerp(0, 5.8 * Math.sqrt(1 - along * along) + 1.3, dispatch));
+      // truck spans x ≈ -6.2 … +5 from the vessel centre, plus the cab's depth when seen at an angle
+      reach = Math.max(reach, lerp(0, 6.4 * Math.sqrt(1 - along * along) + 1.6, dispatch));
       const reachV = 2.0 + dispatch * 0.9;
       const availW = Math.max(0.3, 0.9 - 2 * Math.abs(sx));
       const availH = Math.max(0.3, 0.84 - 2 * Math.abs(sy));

@@ -640,3 +640,11 @@ html.gated .wa-float { opacity: 0; pointer-events: none; }
   .linkbtn, .index-page { min-height: 44px; display: inline-flex; align-items: center; }
   .works .specs a, .rfq .fine a { display: inline-block; padding: 12px 0; }
 }
+
+.wordmark { min-height: 44px; align-items: center; }
+@media (max-width: 820px) {
+  .chapter--dispatch .numbers { margin-top: 12px; }
+  .chapter--dispatch .numbers > div { padding: 6px 0; }
+  .chapter--dispatch .numbers dd { font-size: 1.7rem; margin-top: 2px; }
+  .chapter--dispatch .cta-row { margin-top: 16px; }
+}

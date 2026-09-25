@@ -6,12 +6,13 @@ Awwwards-targeted one-page site for a Bengaluru pressure-vessel fabricator. Spec
 ## Commands
 - `npm run dev` (port 3100) · `npm run build` → static export in `out/` · `npm test` (vitest)
 - Deploy: `vercel deploy --prod` (project `skyudaan-storage-tanks`; vercel.json sets framework `nextjs` only — adding `outputDirectory: out` breaks the build)
-- Screenshot QA: serve `out/` (`python3 -m http.server 8932 -d out`) and scroll `#film` to
-  `t/9 * (film.offsetHeight - innerHeight)` for chapter t. Wait ~1.8 s per shot (camera damping).
+- Screenshot QA: serve `out/` (`python3 -m http.server <port> -d "$PWD/out"`; restart it after every
+  build — it holds the deleted dir). For chapter t (< 8) scroll to `film.offsetTop + t * chapterHeight`;
+  open `/#x` to skip the entry gate. Wait ~1.8 s per shot (camera damping).
 
 ## How the film works (read before touching 3D)
-- One scalar clock `t ∈ [0, 9]` in `lib/store.ts` (zustand). `ScrollDriver` writes it from
-  the `#film` ScrollTrigger; `config ∈ [0,1]` comes from `#configure` entering.
+- One scalar clock `t ∈ [0, 9]` in `lib/store.ts` (zustand). `ScrollDriver` writes it per section:
+  t = i + progress through chapter section i (NOT film progress × 9 — that drifts ~0.9 vh by ch 08); `config ∈ [0,1]` comes from `#configure` entering.
 - Chapter i owns `t ∈ [i, i+1]` (`lib/film.ts`). Every part in `components/three/Vessel.tsx`
   is a pure function of `t` via `seg(t, a, b)` windows — keep it that way (scrubbable both ways).
 - Camera keyframes live in `FRAMES` in `components/three/Stage.tsx`; `sx/sy` shift the scene

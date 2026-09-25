@@ -34,7 +34,18 @@ export function ScrollDriver() {
         trigger: '#film',
         start: 'top top',
         end: 'bottom bottom',
-        onUpdate: (self) => useFilm.setState({ t: self.progress * FILM_END }),
+        // Chapter i's 3D plays exactly while its own section is pinned: t = i + progress through
+        // section i. The last section only scrolls (height - viewport), so it gets that range.
+        onUpdate: (self) => {
+          const film = document.getElementById('film')!;
+          const chapters = film.querySelectorAll<HTMLElement>('.chapter');
+          const y = self.scroll() - film.offsetTop;
+          const h = chapters[0].offsetHeight;
+          const i = Math.max(0, Math.min(FILM_END - 1, Math.floor(y / h)));
+          const span = i === FILM_END - 1 ? h - window.innerHeight : h;
+          const t = Math.max(0, Math.min(FILM_END, i + (y - i * h) / span));
+          useFilm.setState({ t });
+        },
       });
 
       // Hand the finished vessel to the configurator
