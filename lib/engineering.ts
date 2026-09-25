@@ -190,3 +190,19 @@ export function configCode(c: VesselConfig) {
   const m = { is2062: 'IS', ss304: 'S4', ss316: 'S6', sa516: 'SA' }[c.moc];
   return `SU-${o}${Math.round(c.capacityLiters / 1000)}-${m}`;
 }
+
+/** URL-safe share token, e.g. fuel.horizontal.25000.is2062 */
+export function encodeConfig(c: VesselConfig) {
+  return [c.application, c.orientation, c.capacityLiters, c.moc].join('.');
+}
+
+export function decodeConfig(token: string | null): Partial<VesselConfig> | null {
+  if (!token) return null;
+  const [a, o, cap, m] = token.split('.');
+  const app = APPLICATIONS.find((x) => x.id === a)?.id;
+  const ori = ORIENTATIONS.find((x) => x.id === o)?.id;
+  const moc = MOCS.find((x) => x.id === m)?.id;
+  const n = Number(cap);
+  if (!app || !ori || !moc || !Number.isFinite(n)) return null;
+  return { application: app, orientation: ori, moc, capacityLiters: Math.min(100000, Math.max(5000, Math.round(n / 5000) * 5000)) };
+}

@@ -573,3 +573,52 @@ button.index-row { width: 100%; background: none; border: 0; border-bottom: 1px 
   .hud-index, .hud-track { display: none; }
   .chapter-sticky { padding-top: calc(var(--nav-h) - 8px); }
 }
+
+/* ---------------------------------------------------- product pages ---- */
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.pp { position: relative; z-index: 2; background: var(--paper); min-height: 100vh; }
+.pp-nav { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: space-between; height: var(--nav-h); padding: 0 var(--gutter); background: var(--paper-glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--hair); }
+.pp-main { max-width: 1200px; margin: 0 auto; padding: 48px var(--gutter) 96px; }
+.pp-crumbs { color: var(--ink-3); margin-bottom: 40px; }
+.pp-crumbs a { text-decoration: none; }
+.pp-crumbs a:hover { color: var(--cobalt); }
+.pp-lede { max-width: 60ch; }
+.pp-block { margin-top: 96px; }
+.pp-h2 { font-family: var(--font-serif), serif; font-weight: 400; font-size: clamp(2rem, 3.4vw, 3rem); line-height: 1; letter-spacing: -0.015em; margin: 0 0 16px; }
+.pp-table-wrap { overflow-x: auto; margin-top: 24px; border-top: 1px solid var(--ink); }
+.pp-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; min-width: 720px; }
+.pp-table th { text-align: left; font-weight: 400; color: var(--ink-3); padding: 14px 12px 14px 0; border-bottom: 1px solid var(--hair); }
+.pp-table td { padding: 18px 12px 18px 0; border-bottom: 1px solid var(--hair); font-size: 15px; }
+.pp-table tbody tr { transition: background 0.3s; }
+.pp-table tbody tr:hover { background: rgba(29, 59, 255, 0.04); }
+.pp-cap, .pp-price { font-family: var(--font-serif), serif; font-size: 24px !important; }
+.pp-act { text-align: right; white-space: nowrap; }
+.pp-act a { margin-left: 16px; color: var(--cobalt); text-decoration: none; }
+.pp-act a:hover { text-decoration: underline; text-underline-offset: 4px; }
+.pp-two { display: grid; grid-template-columns: 1fr 1.3fr; gap: 64px; }
+.pp-faq { margin: 0; }
+.pp-faq > div { padding: 18px 0; border-top: 1px solid var(--hair); }
+.pp-faq dt { font-weight: 500; margin-bottom: 6px; }
+.pp-faq dd { margin: 0; color: var(--ink-2); font-size: 15px; }
+.pp-cta { padding: 64px 0 0; border-top: 1px solid var(--ink); }
+.pp-cta .display { margin-bottom: 8px; }
+@media (max-width: 820px) { .pp-two { grid-template-columns: 1fr; gap: 48px; } .pp-block { margin-top: 64px; } }
+
+/* floating WhatsApp */
+.wa-float {
+  position: fixed; right: 20px; bottom: 20px; z-index: 55; width: 56px; height: 56px; border-radius: 50%;
+  display: grid; place-items: center; background: var(--ink); color: var(--paper);
+  box-shadow: 0 16px 40px -16px rgba(13, 14, 16, 0.6); transition: transform 0.4s var(--ease-out), background 0.3s, opacity 0.4s;
+}
+.wa-float:hover { transform: scale(1.08); background: var(--cobalt); }
+.wa-float svg { width: 26px; height: 26px; }
+html.gated .wa-float { opacity: 0; pointer-events: none; }
+@media (max-width: 820px) { .wa-float.is-shifted { transform: translateY(-76px); } }
+
+.index-item { position: relative; }
+.index-page { position: absolute; right: 150px; top: 50%; transform: translateY(-50%); color: var(--ink-3); text-decoration: none; padding: 8px 0; }
+.index-page:hover { color: var(--cobalt); text-decoration: underline; text-underline-offset: 4px; }
+.linkbtn { background: none; border: 0; padding: 6px 0; color: var(--cobalt); cursor: pointer; text-align: left; }
+.linkbtn:hover { text-decoration: underline; text-underline-offset: 4px; }
+@media (max-width: 1100px) { .index-page { right: 140px; } }
+@media (max-width: 820px) { .index-page { position: static; transform: none; display: inline-block; margin: -14px 0 14px 36px; } }

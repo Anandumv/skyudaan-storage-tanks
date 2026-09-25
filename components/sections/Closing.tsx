@@ -27,13 +27,14 @@ export function Products() {
       </header>
       <ol className="index">
         {PRODUCTS.map((p, i) => (
-          <li key={p.name} data-fade>
+          <li key={p.name} data-fade className="index-item">
             <button className="index-row" onClick={() => pick(p)}>
               <span className="index-num mono">{String(i + 1).padStart(2, '0')}</span>
               <span className="index-name">{p.name}</span>
               <span className="index-code mono">{p.code}</span>
               <span className="index-go mono">{p.preset ? 'Configure →' : 'Enquire →'}</span>
             </button>
+            {p.slug && <a className="index-page mono" href={`/${p.slug}`}>Sizes & prices</a>}
           </li>
         ))}
       </ol>

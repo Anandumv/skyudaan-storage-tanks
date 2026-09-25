@@ -130,14 +130,16 @@ export const INCLUDED = [
   'Stage-wise inspection by your QA or TÜV, DNV, BV, SGS',
 ];
 
-export const PRODUCTS: { group: string; name: string; code: string; preset?: Preset }[] = [
-  { group: 'Vessels & tanks', name: 'Underground diesel tanks', code: 'PESO · UL-58 · IS 2825', preset: { application: 'fuel', orientation: 'underground', moc: 'is2062', capacityLiters: 25000 } },
-  { group: 'Vessels & tanks', name: 'Aboveground fuel containment', code: 'UL-142 · PESO · API 650', preset: { application: 'fuel', orientation: 'horizontal', moc: 'is2062', capacityLiters: 50000 } },
-  { group: 'Vessels & tanks', name: 'SS 316 chemical reactors', code: 'ASME Sec VIII Div 1', preset: { application: 'reactor', orientation: 'vertical', moc: 'ss316', capacityLiters: 10000 } },
-  { group: 'Vessels & tanks', name: 'Liquid mixing & agitators', code: 'SS 304 · SS 316L', preset: { application: 'chemical', orientation: 'vertical', moc: 'ss304', capacityLiters: 10000 } },
+export type Product = { group: string; name: string; code: string; preset?: Preset; slug?: string; intro?: string };
+
+export const PRODUCTS: Product[] = [
+  { group: 'Vessels & tanks', name: 'Underground diesel tanks', code: 'PESO · UL-58 · IS 2825', slug: 'underground-diesel-tanks', intro: 'Double-wall underground storage for diesel and HSD, built to PESO, UL-58 and IS 2825. Every seam radiographed, every tank hydro-tested before it leaves Yelahanka.', preset: { application: 'fuel', orientation: 'underground', moc: 'is2062', capacityLiters: 25000 } },
+  { group: 'Vessels & tanks', name: 'Aboveground fuel containment', code: 'UL-142 · PESO · API 650', slug: 'aboveground-fuel-tanks', intro: 'Horizontal saddle-mounted fuel tanks to UL-142, PESO and API 650 for plants, DG sets and fuel stations — rolled, SAW-welded and 100% X-rayed in Bengaluru.', preset: { application: 'fuel', orientation: 'horizontal', moc: 'is2062', capacityLiters: 50000 } },
+  { group: 'Vessels & tanks', name: 'SS 316 chemical reactors', code: 'ASME Sec VIII Div 1', slug: 'ss316-chemical-reactors', intro: 'Vertical SS 316L process reactors designed to ASME Sec VIII Div 1, for acids, solvents and corrosive duty, with full material traceability (EN 10204 3.1).', preset: { application: 'reactor', orientation: 'vertical', moc: 'ss316', capacityLiters: 10000 } },
+  { group: 'Vessels & tanks', name: 'Liquid mixing & agitators', code: 'SS 304 · SS 316L', slug: 'mixing-tanks-agitators', intro: 'Stainless steel mixing and agitator vessels in SS 304 and SS 316L for chemical, pharma and food-grade duty, with inspection manways and ANSI-flanged nozzles.', preset: { application: 'chemical', orientation: 'vertical', moc: 'ss304', capacityLiters: 10000 } },
   { group: 'Vessels & tanks', name: 'Cryogenic liquid oxygen', code: 'Pressure containment' },
-  { group: 'Silos & plants', name: 'Cement storage silos', code: '50 T – 250 T', preset: { application: 'silo', orientation: 'vertical', moc: 'is2062', capacityLiters: 100000 } },
-  { group: 'Silos & plants', name: 'Fly ash & lime bolted silos', code: 'IS 9178 · DIN 1055', preset: { application: 'silo', orientation: 'vertical', moc: 'is2062', capacityLiters: 75000 } },
+  { group: 'Silos & plants', name: 'Cement storage silos', code: '50 T – 250 T', slug: 'cement-storage-silos', intro: 'Vertical cement storage silos from 50 T to 250 T, designed to IS 9178 and DIN 1055, fabricated from heavy rolled plate up to 35 mm.', preset: { application: 'silo', orientation: 'vertical', moc: 'is2062', capacityLiters: 100000 } },
+  { group: 'Silos & plants', name: 'Fly ash & lime bolted silos', code: 'IS 9178 · DIN 1055', slug: 'fly-ash-lime-silos', intro: 'Fly ash and lime storage silos to IS 9178 and DIN 1055 for AAC, cement and power plants, blasted to SA 2.5 and coated for outdoor service.', preset: { application: 'silo', orientation: 'vertical', moc: 'is2062', capacityLiters: 75000 } },
   { group: 'Silos & plants', name: 'Turnkey AAC block plants', code: 'Turnkey' },
   { group: 'Silos & plants', name: 'High-pressure autoclaves', code: 'ASME Sec VIII' },
   { group: 'Services', name: 'Heavy plate rolling', code: 'Up to 35 mm' },

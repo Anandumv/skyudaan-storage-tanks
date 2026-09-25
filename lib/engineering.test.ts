@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { calculate, defaultConfig, formatInr, gaDrawingSvg } from './engineering';
+import { calculate, decodeConfig, defaultConfig, encodeConfig, formatInr, gaDrawingSvg } from './engineering';
 
 // Oracle values produced by the original js/configurator.js (commit ca0cd3a).
 describe('calculate', () => {
@@ -51,5 +51,17 @@ describe('gaDrawingSvg', () => {
     expect(svg).toContain('Ø 2197');
     expect(svg).toContain('6592');
     expect(svg).toContain('SKYUDAAN EN-FAB');
+  });
+});
+
+describe('share tokens', () => {
+  it('round-trips a configuration', () => {
+    const c = { ...defaultConfig, application: 'silo' as const, orientation: 'vertical' as const, capacityLiters: 75000, moc: 'ss304' as const };
+    expect(decodeConfig(encodeConfig(c))).toEqual({ application: 'silo', orientation: 'vertical', capacityLiters: 75000, moc: 'ss304' });
+  });
+  it('rejects junk and clamps capacity', () => {
+    expect(decodeConfig('nope.x.1.y')).toBeNull();
+    expect(decodeConfig(null)).toBeNull();
+    expect(decodeConfig('fuel.horizontal.999999.is2062')?.capacityLiters).toBe(100000);
   });
 });

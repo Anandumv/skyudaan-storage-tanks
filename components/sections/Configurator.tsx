@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, type PointerEvent as ReactPointerEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import { INCLUDED } from '@/lib/content';
 import { sound } from '@/lib/audio';
 import {
@@ -10,6 +10,8 @@ import {
   ORIENTATIONS,
   calculate,
   configCode,
+  decodeConfig,
+  encodeConfig,
   formatInr,
   formatNum,
   gaDrawingSvg,
@@ -79,7 +81,25 @@ export function Configurator() {
   const setVessel: typeof setRaw = (patch) => {
     sound?.tick();
     setRaw(patch);
+    // keep the address bar shareable: /?c=fuel.horizontal.25000.is2062#configure
+    const next = { ...useFilm.getState().vessel };
+    history.replaceState(null, '', `?c=${encodeConfig(next)}#configure`);
   };
+  const [copied, setCopied] = useState(false);
+  const copyLink = async () => {
+    const url = `${location.origin}/?c=${encodeConfig(useFilm.getState().vessel)}#configure`;
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      history.replaceState(null, '', url);
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2200);
+  };
+  useEffect(() => {
+    const shared = decodeConfig(new URLSearchParams(location.search).get('c'));
+    if (shared) setRaw(shared);
+  }, [setRaw]);
   const drag = useRef<{ x: number; yaw: number } | null>(null);
   const onDown = (e: ReactPointerEvent<HTMLDivElement>) => {
     drag.current = { x: e.clientX, yaw: useFilm.getState().yaw };
@@ -200,6 +220,9 @@ export function Configurator() {
           </ul>
           <button className="btn btn--ink btn--wide" onClick={sendToRfq}>Get a firm quote for this vessel →</button>
           <button className="btn btn--line btn--wide" onClick={download}>Download GA drawing (.svg)</button>
+          <button className="linkbtn mono" onClick={copyLink} aria-live="polite">
+            {copied ? 'Link copied — send it to your procurement team' : 'Copy link to this vessel →'}
+          </button>
           <p className="fine">Indicative sizing and budget. The firm quote follows an engineer’s review of your duty, codes and site.</p>
         </div>
       </div>
